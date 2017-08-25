@@ -1,0 +1,264 @@
+Option Explicit
+
+'Declare User Form Variables
+Dim unitNames(4) As String
+Dim ranks(13) As String
+Dim hhbTestTypes(6) As String
+Dim fuTestTypes(9) As String
+
+'Action taken when a different unit is selected on the User Form
+Private Sub cmbUnit_Change()
+    cmbTestType.Value = Null
+
+    Select Case cmbUnit.Value
+        Case "HHB"
+            cmbTestType.List = hhbTestTypes
+        Case "A-BTRY"
+            cmbTestType.List = fuTestTypes
+        Case "B-BTRY"
+            cmbTestType.List = fuTestTypes
+        Case "C-BTRY"
+            cmbTestType.List = fuTestTypes
+        Case "D-BTRY"
+            cmbTestType.List = fuTestTypes
+        Case Else
+            cmbTestType.List = Array("")
+        End Select
+End Sub
+
+Private Sub cmdClearResults_Click()
+    ClearAll
+End Sub
+
+Private Sub cmdSubmitResults_Click()
+    'Declare variables
+    Dim formErrors As String
+    Dim errorFlag As Boolean
+    Dim response As Long
+    Dim rowToAdd As Range
+    
+    'Verify unit name is input
+    If cmbUnit = "" Then
+        formErrors = "Unit Name is missing." & vbCr
+        errorFlag = True
+    End If
+    
+    'Verify rank is input
+    If cmbRank = "" Then
+        formErrors = formErrors & "Soldier's Rank is missing." & vbCr
+        errorFlag = True
+    End If
+    
+    'Verify last name is input
+    If txtLastName = "" Then
+        formErrors = formErrors & "Soldier's Last Name is missing." & vbCr
+        errorFlag = True
+    End If
+    
+    'Verify test type is input
+    If cmbTestType = "" Then
+        formErrors = formErrors & "Test Type is missing." & vbCr
+        errorFlag = True
+    End If
+    
+    'Verify test score is input and contains a valid value
+    If txtScore = "" Then
+        formErrors = formErrors & "Test Score is missing." & vbCr
+        errorFlag = True
+    ElseIf txtScore < 0 Or txtScore > 100 Then
+        formErrors = formErrors & "Test Score contains invalid entry." & vbCr
+        errorFlag = True
+    End If
+    
+    'Verify test date is input and contains a valid value
+    If txtDate = "" Then
+        formErrors = formErrors & "Test Date is missing." & vbCr
+        errorFlag = True
+    ElseIf Not IsDate(txtDate.Value) Then
+        formErrors = formErrors & "Test Date contains invalid entry. (must use mm/dd/yyyy)" & vbCr
+        errorFlag = True
+    End If
+    
+    'If any errors found, displays errors to user for correction and exits procedure
+    If errorFlag Then
+        MsgBox "The input form has the following errors:" & vbCr & vbCr & formErrors
+    Else
+        'Show user roll-up of information prior to submitting
+        response = MsgBox("Verify the following information is correct:" & vbCr & vbCr & BuildRollup, vbOKCancel)
+        
+        'If user confirms information, input data to the spreadsheet
+        If response = vbOK Then
+            'Find the correct row for the data to be entered
+            Set rowToAdd = CorrectRow
+            
+            'If row is already populated with previous entry, insert test score and date
+            If Not Range(ColumnLetter(rowToAdd.Column) & rowToAdd.Row) = "" Then
+                Call TableIVResultAutomation.InputDataToPopulatedRow(rowToAdd, txtScore.Value, txtDate.Value)
+                
+            'If blank row, populate with user form data
+            Else
+                Call InputDataToEmptyRow(rowToAdd, cmbUnit.Value, cmbRank.Value, _
+                    txtLastName.Value, cmbTestType.Value, txtScore.Value, txtDate.Value)
+            End If
+        'If user hits cancel, information is not submitted to spreadsheet
+        Else
+            Exit Sub
+        End If
+    End If
+End Sub
+
+'Command button procedure to populate the date box with the current day
+Private Sub cmdTodaysDate_Click()
+    txtDate.Value = Date
+End Sub
+
+'Change the Last Name to Upper Case when input
+Private Sub txtLastName_Change()
+    txtLastName.Value = UCase(txtLastName.Value)
+End Sub
+
+'Subroutine that runs when user form is initialized
+Private Sub UserForm_Initialize()
+    'Call procedure to populate the arrays for the comboboxes
+    Initialize_Variables
+    
+    'Populate the comboboxes with the array values
+    cmbUnit.List = unitNames
+    cmbRank.List = ranks
+End Sub
+
+'Helper subroutine that builds the arrays for unit names, ranks and test types
+Private Sub Initialize_Variables()
+    'Initialize the unit names
+    unitNames(0) = "HHB"
+    unitNames(1) = "A-BTRY"
+    unitNames(2) = "B-BTRY"
+    unitNames(3) = "C-BTRY"
+    unitNames(4) = "D-BTRY"
+    
+    'Initialize the ranks
+    ranks(0) = "PVT"
+    ranks(1) = "PV2"
+    ranks(2) = "PFC"
+    ranks(3) = "SPC"
+    ranks(4) = "SGT"
+    ranks(5) = "SSG"
+    ranks(6) = "SFC"
+    ranks(7) = "MSG"
+    ranks(8) = "2LT"
+    ranks(9) = "1LT"
+    ranks(10) = "CPT"
+    ranks(11) = "WO1"
+    ranks(12) = "CW2"
+    ranks(13) = "CW3"
+    
+    'Initialize the test types for HHB
+    hhbTestTypes(0) = "AMG (HHB)"
+    hhbTestTypes(1) = "BME"
+    hhbTestTypes(2) = "Commo"
+    hhbTestTypes(3) = "CRG"
+    hhbTestTypes(4) = "ICC"
+    hhbTestTypes(5) = "RSOP (HHB)"
+    hhbTestTypes(6) = "TCS"
+    
+    'Initialize the test types for Fire Units
+    fuTestTypes(0) = "AMG (FU)"
+    fuTestTypes(1) = "BCP"
+    fuTestTypes(2) = "BMC"
+    fuTestTypes(3) = "Commo"
+    fuTestTypes(4) = "ECS"
+    fuTestTypes(5) = "EPP"
+    fuTestTypes(6) = "LS"
+    fuTestTypes(7) = "Reload"
+    fuTestTypes(8) = "RS"
+    fuTestTypes(9) = "RSOP (FU)"
+End Sub
+
+'Clears all entries in the User Form
+Private Sub ClearAll()
+    cmbUnit.Value = ""
+    cmbRank.Value = ""
+    txtLastName = ""
+    cmbTestType = ""
+    txtScore = ""
+    txtDate = ""
+End Sub
+
+'Returns the correct row to input data. If valid row isn't found based on
+'previous entries, function creates a new row and returns Range
+Private Function CorrectRow() As Range
+    'Declare variables
+    Dim ws As Worksheet
+    Dim resultsTable As String
+    Dim lastRow As Long
+    Dim lastColumn As Long
+    Dim nameCell As Range
+
+    'Assign correct worksheet to variable based on selected unit
+    Select Case cmbUnit.Value
+        Case "HHB"
+            Set ws = Sheets("HHB Table IV Results")
+            resultsTable = "HHB_Results"
+        Case "A-BTRY"
+            Set ws = Sheets("A-BTRY Table IV Results")
+            resultsTable = "A_Results"
+        Case "B-BTRY"
+            Set ws = Sheets("B-BTRY Table IV Results")
+            resultsTable = "B_Results"
+        Case "C-BTRY"
+            Set ws = Sheets("C-BTRY Table IV Results")
+            resultsTable = "C_Results"
+        Case "D-BTRY"
+            Set ws = Sheets("D-BTRY Table IV Results")
+            resultsTable = "D_Results"
+        Case Else
+            End
+    End Select
+    
+    'Select correct worksheet (MUST BE ACTIVE for later subroutine calls)
+    ws.Select
+    
+    'Find last row and column with information
+    lastRow = Cells(Rows.Count, 1).End(xlUp).Row
+    lastColumn = Cells(1, Columns.Count).End(xlToLeft).Column
+
+    'Select correct row based on last name, rank and test type
+    For Each nameCell In Range("C2:C" & lastRow)
+        If txtLastName.Value = nameCell.Value Then
+            If cmbRank.Value = nameCell.Offset(0, -1).Value Then
+                If cmbTestType.Value = nameCell.Offset(0, 1) Then
+                   Set CorrectRow = Range("A" & nameCell.Row & ":" & _
+                        ColumnLetter(lastColumn) & nameCell.Row)
+                    Exit Function
+                End If
+            End If
+        End If
+    Next nameCell
+    
+    'If previous entry isn't found and there isn't already a blank row, create new row
+    If Not Range("A" & lastRow).Value = "" Then
+        ws.ListObjects(resultsTable).ListRows.Add AlwaysInsert:=True
+        lastRow = lastRow + 1
+    End If
+    
+    'Return new/empty row as range
+    Set CorrectRow = Range("A" & lastRow & ":" & _
+        ColumnLetter(lastColumn) & lastRow)
+End Function
+
+'Returns string with all information input into the AddTest User Form
+Private Function BuildRollup() As String
+    BuildRollup = "Unit: " & cmbUnit.Value & vbCr & _
+        "Rank: " & cmbRank.Value & vbCr & _
+        "Last Name: " & txtLastName.Value & vbCr & _
+        "Test Type: " & cmbTestType.Value & vbCr & _
+        "Score: " & txtScore & "%" & vbCr & _
+        "Date: " & txtDate
+End Function
+
+'Helper function to find the column letter from the column number
+Private Function ColumnLetter(lngCol As Long) As String
+    Dim vArr
+    vArr = Split(Cells(1, lngCol).Address(True, False), "$")
+    ColumnLetter = vArr(0)
+End Function
