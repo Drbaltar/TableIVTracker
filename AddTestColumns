@@ -1,0 +1,102 @@
+'Helper subroutine that adds two rows in order to make room for more test entries
+Private Sub AddTestColumns(resultsTable As ListObject)
+    'Declare variables
+    Dim columnsInTable As Integer
+    Dim testNumber As Integer
+
+    With resultsTable
+        'Find out test number for the header titles and number of columns
+        columnsInTable = .ListColumns.Count
+        testNumber = (columnsInTable - 4) / 2 + 1
+
+        'Add two columns to the end of the table
+        .ListColumns.Add (columnsInTable + 1)
+        .ListColumns.Add (columnsInTable + 2)
+        
+        'Format the first new column and set appropriate header
+        .ListColumns(columnsInTable + 1).DataBodyRange.Select
+        Selection.Borders(xlDiagonalDown).LineStyle = xlNone
+        Selection.Borders(xlDiagonalUp).LineStyle = xlNone
+        With Selection.Borders(xlEdgeLeft)
+            .LineStyle = xlContinuous
+            .ColorIndex = 0
+            .TintAndShade = 0
+            .Weight = xlThin
+        End With
+        With Selection.Borders(xlEdgeTop)
+            .LineStyle = xlContinuous
+            .ColorIndex = 0
+            .TintAndShade = 0
+            .Weight = xlThin
+        End With
+        With Selection.Borders(xlEdgeBottom)
+            .LineStyle = xlContinuous
+            .ColorIndex = 0
+            .TintAndShade = 0
+            .Weight = xlThin
+        End With
+        With Selection.Borders(xlEdgeRight)
+            .LineStyle = xlContinuous
+            .ColorIndex = 0
+            .TintAndShade = 0
+            .Weight = xlThin
+        End With
+        With Selection.Borders(xlInsideVertical)
+            .LineStyle = xlContinuous
+            .ColorIndex = 0
+            .TintAndShade = 0
+            .Weight = xlThin
+        End With
+        With Selection.Borders(xlInsideHorizontal)
+            .LineStyle = xlContinuous
+            .ColorIndex = 0
+            .TintAndShade = 0
+            .Weight = xlThin
+        End With
+        Selection.Style = "Percent"
+        .HeaderRowRange(columnsInTable + 1).Value = "Score" & testNumber
+
+        'Format the first new column and set appropriate header
+        .ListColumns(columnsInTable + 2).DataBodyRange.Select
+        Selection.Borders(xlDiagonalDown).LineStyle = xlNone
+        Selection.Borders(xlDiagonalUp).LineStyle = xlNone
+        With Selection.Borders(xlEdgeLeft)
+            .LineStyle = xlContinuous
+            .ColorIndex = 0
+            .TintAndShade = 0
+            .Weight = xlThin
+        End With
+        With Selection.Borders(xlEdgeTop)
+            .LineStyle = xlContinuous
+            .ColorIndex = 0
+            .TintAndShade = 0
+            .Weight = xlThin
+        End With
+        With Selection.Borders(xlEdgeBottom)
+            .LineStyle = xlContinuous
+            .ColorIndex = 0
+            .TintAndShade = 0
+            .Weight = xlThin
+        End With
+        With Selection.Borders(xlEdgeRight)
+            .LineStyle = xlContinuous
+            .ColorIndex = 0
+            .TintAndShade = 0
+            .Weight = xlThin
+        End With
+        With Selection.Borders(xlInsideVertical)
+            .LineStyle = xlContinuous
+            .ColorIndex = 0
+            .TintAndShade = 0
+            .Weight = xlThin
+        End With
+        With Selection.Borders(xlInsideHorizontal)
+            .LineStyle = xlContinuous
+            .ColorIndex = 0
+            .TintAndShade = 0
+            .Weight = xlThin
+        End With
+        Selection.NumberFormat = "[$-en-US]d-mmm-yy;@"
+        .HeaderRowRange(columnsInTable + 2).Value = "Date" & testNumber
+    End With
+End Sub
