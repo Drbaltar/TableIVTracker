@@ -1,0 +1,6 @@
+'Helper function to find the column letter from the column number
+Private Function ColumnLetter(lngCol As Long) As String
+    Dim vArr
+    vArr = Split(Cells(1, lngCol).Address(True, False), "$")
+    ColumnLetter = vArr(0)
+End Function
