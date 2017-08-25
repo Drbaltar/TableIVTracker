@@ -1,0 +1,15 @@
+'Helper function to find the first blank cell in input range
+'If there isn't a blank cell, returns nothing
+Private Function FirstBlankCell(cellsToCheck As Range) As Range
+    'Declare variable
+    Dim individualCell As Range
+    
+    'Check every cell in range to check for the first empty cell
+    For Each individualCell In cellsToCheck
+        If IsEmpty(individualCell) Then
+            'When an empty cell is found, return as range
+            Set FirstBlankCell = individualCell
+            Exit Function
+        End If
+    Next individualCell
+End Function
