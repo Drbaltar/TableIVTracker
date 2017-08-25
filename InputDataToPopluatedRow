@@ -1,0 +1,52 @@
+'Procedure used to input test results into a row that already has data from previous tests
+'Only requires the range of the row, test score and test date
+Public Sub InputDataToPopulatedRow(rowToAdd As Range, testScore As Integer, testDate As Date)
+    'Declare variables
+    Dim previousTestScores As Range
+    Dim newTestScores As Long
+    Dim resultsTable As ListObject
+    Dim indexCell As Range
+    Dim index As Integer
+    
+    Set resultsTable = ActiveSheet.ListObjects(rowToAdd.ListObject.Name)
+    
+    'If more room is needed to insert test results
+    If Not isRoomForEntry(rowToAdd) Then
+        'Find name of the results table to add extra columns
+        AddTestColumns resultsTable
+        Set rowToAdd = Range("A" & rowToAdd.Row & ":" & _
+            ColumnLetter(resultsTable.ListColumns.Count) & rowToAdd.Row)
+    End If
+
+    'Find the previous test entries to move
+    Set previousTestScores = PreviousTestEntries(rowToAdd, testDate)
+        
+    'If no tests need to be moved, find first blank cell
+    If previousTestScores Is Nothing Then
+        newTestScores = FirstBlankCell(rowToAdd).Column
+            
+        'Insert the new test date and score and resize column
+        Cells(rowToAdd.Row, newTestScores).Value = testScore / 100
+        Columns(newTestScores).EntireColumn.AutoFit
+        Cells(rowToAdd.Row, newTestScores + 1).Value = testDate
+        Columns(newTestScores + 1).EntireColumn.AutoFit
+        Exit Sub
+    End If
+        
+    'Initialize the column to put the new test entries
+    newTestScores = previousTestScores.Column
+
+    'Move the previous test scores (values only) to the right two cells
+    For index = previousTestScores.Columns.Count To 0 Step -1
+        Set indexCell = previousTestScores(index)
+        indexCell.Offset(0, 2).Value = indexCell.Value
+    Next index
+    
+    'Resize the last two columns
+    Columns(resultsTable.ListColumns.Count - 1).EntireColumn.AutoFit
+    Columns(resultsTable.ListColumns.Count).EntireColumn.AutoFit
+        
+    'Insert the new test date and score
+    Cells(rowToAdd.Row, newTestScores).Value = testScore / 100
+    Cells(rowToAdd.Row, newTestScores + 1).Value = testDate
+End Sub
