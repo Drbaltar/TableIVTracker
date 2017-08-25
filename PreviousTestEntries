@@ -1,0 +1,38 @@
+'Helper function to select range of test scores that need to move for an entry input
+'Returns nothing if no previous test entries need to move
+Private Function PreviousTestEntries(rowToAdd As Range, testDate As Date) As Range
+    'Declare variable
+    Dim firstPreviousTest As Range
+    Dim lastTestCell As Range
+    Dim individualCell As Range
+    
+    'Find the first test score that is prior to the test being input
+    For Each individualCell In rowToAdd
+        If IsDate(individualCell.Value) And individualCell.Value < testDate Then
+            Set firstPreviousTest = individualCell.Offset(0, -1)
+            Exit For
+        End If
+    Next individualCell
+    
+    'All entries found are after input date
+    If firstPreviousTest Is Nothing Then
+        Exit Function
+    End If
+    
+    'Find the end of the test scores
+    For Each individualCell In rowToAdd
+        If IsEmpty(individualCell) Then
+            Set lastTestCell = individualCell.Offset(0, -1)
+            Exit For
+        End If
+    Next individualCell
+    
+    'If there aren't any empty cells in range, last cell will be end of range
+    If lastTestCell Is Nothing Then
+        Set lastTestCell = rowToAdd.Cells(1, rowToAdd.Columns.Count)
+    End If
+    
+    'Create new range from the first to lest test score entries (Date and Score)
+    Set PreviousTestEntries = Range(ColumnLetter(firstPreviousTest.Column) & rowToAdd.Row & ":" & _
+        ColumnLetter(lastTestCell.Column) & rowToAdd.Row)
+End Function
