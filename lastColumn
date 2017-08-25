@@ -1,0 +1,4 @@
+'Helper function used to find the last column used in the current Active Sheet
+Private Function lastColumn() As Long
+    lastColumn = Cells(1, Columns.Count).End(xlToLeft).Column
+End Function
