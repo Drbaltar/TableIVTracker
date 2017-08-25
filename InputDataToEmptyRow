@@ -1,0 +1,13 @@
+'Procedure used to input test results into a row without data from previous tests
+'Requires the range of the row, unit, rank, last name, test type, test score and test date
+Public Sub InputDataToEmptyRow(rowToAdd As Range, unit As String, rank As String, _
+                lastName As String, testType As String, testScore As Integer, testDate As Date)
+    'Insert values into empty row and resize columns
+    Cells(rowToAdd.Row, 1).Value = unit
+    Cells(rowToAdd.Row, 2).Value = rank
+    Cells(rowToAdd.Row, 3).Value = lastName
+    Cells(rowToAdd.Row, 4).Value = testType
+    Cells(rowToAdd.Row, 5).Value = testScore / 100
+    Cells(rowToAdd.Row, 6).Value = testDate
+    Columns("A:F").EntireColumn.AutoFit
+End Sub
