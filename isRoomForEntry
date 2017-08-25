@@ -1,0 +1,15 @@
+'Helper function that returns true if there are blank entries on the input row for test results to be input
+Private Function isRoomForEntry(rowToAdd As Range) As Boolean
+    'Declare variables
+    Dim individualCell As Range
+    isRoomForEntry = False
+    
+    'Check every cell in range to see if there is space to add another entry
+    For Each individualCell In rowToAdd
+        If IsEmpty(individualCell) Then
+            'When an empty cell is found, return True and exit
+            isRoomForEntry = True
+            Exit Function
+        End If
+    Next individualCell
+End Function
